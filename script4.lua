@@ -1,4 +1,4 @@
--- Kommentar
+-- Comment
 
 EvtNotifyId = 0
 CountWordsCount = 0
@@ -28,15 +28,7 @@ end
 function CountWords(strFile, iThreadNr)
     local t = {}
 
---    for k in string.gmatch(strFile, "(%w+)") do
---        if (tableHasKey(t,k)) then
---            t[k] = t[k] + 1
---        else
---            t[k] = 1
---        end
---        --OutputDebugString("  " .. k .. "\r\n")
---    end
-    CountWordsCount = CountWordsCount + 1
+    CountWordsCount = CountWordsCount + 1   -- Dummy inc. the global variable
     DbgOut("Lua loop start " .. tostring(iThreadNr))
     local file = io.open(strFile, "r" )
     if ( io.type( file ) == "file" ) then
@@ -59,55 +51,6 @@ function CountWords(strFile, iThreadNr)
     end
     DbgOut("Lua loop end " .. tostring(iThreadNr))
     return t
-end
-
-function HaveMailToSend(strMailFile, tblMailUser)
-    OutputDebugString(os.date() .. " - Maildatei zum versenden: " .. strMailFile .. "\r\n")
-
---    local n=#tblMailUser
---    for i=1,n do
---        local m=#tblMailUser[i]
---        --OutputDebugString("  " .. tostring(m) .. "\r\n")
---        OutputDebugString("  " .. tblMailUser[i][1] .. "," .. tblMailUser[i][2] .. "\r\n")
---    end
-
-    local bRet = true
-    local file = io.open(strMailFile, "r" )
-    if ( io.type( file ) == "file" ) then
-        for line in file:lines() do
-            if ( line == nil or line == '' ) then
-               break
-            end
-
-            local nPos = line:find(':', 1, true)
-            if (nPos ~= nil) then
-                local strKey = string.lower(string.sub(line, 1, nPos))
-                if (strKey == 'subject:' and line:find("###", nPos, true) ~= nil) then
-                    bRet = false
-                    break
-                end
-            end
-        end
-        file:close()
-    end
-
-    return bRet
-end
-
-function HaveMailReceived(strMailFile, tblMailUser)
-    OutputDebugString(os.date() .. " - Maildatei abgeholt: " .. strMailFile .. "\r\n")
-
---    local n=#tblMailUser
---    for i=1,n do
---        local m=#tblMailUser[i]
---        --OutputDebugString("  " .. tostring(m) .. "\r\n")
---        OutputDebugString("  " .. tblMailUser[i][1] .. "," .. tblMailUser[i][2] .. "\r\n")
---    end
---
---    for k,v in pairs(_G) do
---        OutputDebugString("  Global key: " .. k .. ", type: " .. type(v) .. ", value: " .. tostring(v) .. "\r\n")
---    end
-    return true
 end
 
 function Init()
