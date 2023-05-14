@@ -60,7 +60,7 @@ int main(int argc, const char* argv[])
             static_assert(true, "parameter typ not suported!");
     };
 
-    LuaScript Script;
+    LuaScript Script;   // The Script object
     Script.RegisterFunction("DbgOut", [](ScrPara_t InPara) -> ScrPara_t
     {
         if (std::holds_alternative<std::string>(InPara) == true)
@@ -70,6 +70,7 @@ int main(int argc, const char* argv[])
     });
     Script.SetGlobalValue("_VERSION_", ScrPara_t{1.0});
 
+    // Load a lua script from file
     if (Script.LoadScriptFile(szScriptPath) == true)
     {
         // call a init function in the script
@@ -99,56 +100,55 @@ int main(int argc, const char* argv[])
         InParam = tblTest;
         if (Script.CallFunction("OutTable", InParam, 0, OutPara) == false)
             OutputDebugStringA(std::string(Script.GetErrorString() + "\r\n").c_str());
-    }
 
-    ScrPara_t OutPara;
-    if (Script.NotifyEvent("EvDoSomething", ScrPara_t({std::vector<ScrPara_t>({ 3, 5})}), 1, OutPara) == true)
-    {
-        if (std::holds_alternative<int>(OutPara) == true)
-            OutputDebugStringA(std::string("Event function call returned: " + std::to_string(std::get<int>(OutPara)) + "\r\n").c_str());
-    }
-
-    // start 20 threads all calling a lua function
-    constexpr size_t nAnzThreads = 20;
-    std::thread t[nAnzThreads];
-    std::mutex mxLock;
-
-    for (size_t n = 0; n < nAnzThreads; ++n)
-    {
-        t[n] = std::thread([&] (size_t iThreadNr)
+        if (Script.NotifyEvent("EvDoSomething", ScrPara_t({std::vector<ScrPara_t>({ 3, 5})}), 1, OutPara) == true)
         {
-            ScrPara_t InParam = std::vector<ScrPara_t>({ std::string("CMakeCache.txt"), static_cast<int>(iThreadNr) });
-            ScrPara_t OutPara;
-            if (Script.CallFunction("CountWords", InParam, 1, OutPara) == true)
-            {
-                std::lock_guard<std::mutex> lock(mxLock);
-                OutputDebugStringA(std::string("Has the function call return a List?: " + std::to_string(std::holds_alternative<std::vector<ScrPara_t>>(OutPara)) + "\r\n").c_str());
-            }
-            else
-            {
-                std::lock_guard<std::mutex> lock(mxLock);
-                OutputDebugStringA(std::string("Lua  call error: " + Script.GetErrorString() + "\r\n").c_str());
-            }
-        }, n);
-    }
+            if (std::holds_alternative<int>(OutPara) == true)
+                OutputDebugStringA(std::string("Event function call returned: " + std::to_string(std::get<int>(OutPara)) + "\r\n").c_str());
+        }
 
-    for (size_t n = 0; n < nAnzThreads; ++n)
-    {
-        if (t[n].joinable())
-            t[n].join();
-    }
+        // start 20 threads all calling a lua function
+        constexpr size_t nAnzThreads = 20;
+        std::thread t[nAnzThreads];
+        std::mutex mxLock;
 
-    if (Script.NotifyEvent("EvDoSomething", ScrPara_t({std::vector<ScrPara_t>({ 7, 8})}), 1, OutPara) == true)
-    {
+        for (size_t n = 0; n < nAnzThreads; ++n)
+        {
+            t[n] = std::thread([&] (size_t iThreadNr)
+            {
+                ScrPara_t InParam = std::vector<ScrPara_t>({ std::string("CMakeCache.txt"), static_cast<int>(iThreadNr) });
+                ScrPara_t OutPara;
+                if (Script.CallFunction("CountWords", InParam, 1, OutPara) == true)
+                {
+                    std::lock_guard<std::mutex> lock(mxLock);
+                    OutputDebugStringA(std::string("Has the function call return a List?: " + std::to_string(std::holds_alternative<std::vector<ScrPara_t>>(OutPara)) + "\r\n").c_str());
+                }
+                else
+                {
+                    std::lock_guard<std::mutex> lock(mxLock);
+                    OutputDebugStringA(std::string("Lua  call error: " + Script.GetErrorString() + "\r\n").c_str());
+                }
+            }, n);
+        }
+
+        for (size_t n = 0; n < nAnzThreads; ++n)
+        {
+            if (t[n].joinable())
+                t[n].join();
+        }
+
+        if (Script.NotifyEvent("EvDoSomething", ScrPara_t({std::vector<ScrPara_t>({ 7, 8})}), 1, OutPara) == true)
+        {
+            if (std::holds_alternative<int>(OutPara) == true)
+                OutputDebugStringA(std::string("Event function call returned: " + std::to_string(std::get<int>(OutPara)) + "\r\n").c_str());
+        }
+
+        OutPara = Script.GetGlobalValue("CountWordsCount");
         if (std::holds_alternative<int>(OutPara) == true)
-            OutputDebugStringA(std::string("Event function call returned: " + std::to_string(std::get<int>(OutPara)) + "\r\n").c_str());
+            OutputDebugStringA(std::string("Global variable holds: " + std::to_string(std::get<int>(OutPara)) + "\r\n").c_str());
+
+        Script.CallFunction("Fini", ScrPara_t(), 0, OutPara);
     }
-
-    OutPara = Script.GetGlobalValue("CountWordsCount");
-    if (std::holds_alternative<int>(OutPara) == true)
-        OutputDebugStringA(std::string("Global variable holds: " + std::to_string(std::get<int>(OutPara)) + "\r\n").c_str());
-
-    Script.CallFunction("Fini", ScrPara_t(), 0, OutPara);
 
     return 0;
 }
