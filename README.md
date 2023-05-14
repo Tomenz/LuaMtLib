@@ -1,2 +1,2 @@
 # LuaMtLib
-calling a lua functions from multiple threads
+Calling a lua functions from multiple threads
