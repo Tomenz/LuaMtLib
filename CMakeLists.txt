@@ -23,11 +23,11 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
     if(GIT_SUBMODULE)
         message(STATUS "Submodule update")
         if(NOT EXISTS "${PROJECT_SOURCE_DIR}/lua")
-            execute_process(COMMAND ${GIT_EXECUTABLE} submodule add https://github.com/lua/lua.git
+            execute_process(COMMAND ${GIT_EXECUTABLE} submodule add -f https://github.com/lua/lua.git
                             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                             RESULT_VARIABLE GIT_SUBMOD_RESULT)
         else()
-            execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+            execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive -f
                             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                             RESULT_VARIABLE GIT_SUBMOD_RESULT)
         endif()
