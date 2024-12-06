@@ -80,7 +80,7 @@ set(LUA_LIB_SRCS
 
 set_source_files_properties(${LUA_LIB_SRCS} PROPERTIES LANGUAGE C)
 ADD_DEFINITIONS(-DLUA_USER_H="../lualock.h")
-add_library(${PROJECT_NAME} STATIC ${LUA_LIB_SRCS} LuaScript.cpp)
+add_library(${PROJECT_NAME} STATIC ${LUA_LIB_SRCS}  ${CMAKE_CURRENT_LIST_DIR}/LuaScript.cpp)
 
 # Test executable
 add_executable(LuaTest LuaTest.cpp)
