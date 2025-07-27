@@ -339,10 +339,10 @@ int LuaScript::PushParameter(lua_State* LThread, const ScrPara_t& InPara)
                 lua_newtable(LThread);    // table row
                 lua_pushstring(LThread, &tblRow.first[0]);    // Col 1
                 lua_rawseti(LThread,-2,1);
-                for (int n = 0; n < tblRow.second.size(); ++n)
+                for (size_t n = 0; n < tblRow.second.size(); ++n)
                 {
                     lua_pushstring(LThread, &tblRow.second[n][0]);// Col 2
-                    lua_rawseti(LThread,-2,2 + n);
+                    lua_rawseti(LThread,-2,2 + static_cast<int>(n));
                 }
                 lua_rawseti(LThread,-2, ++iRow);
             }
